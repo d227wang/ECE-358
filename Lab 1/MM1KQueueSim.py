@@ -121,7 +121,7 @@ def setupEvents(eventsHeap, simTime, rho):
 def main():
 	print("============================BEGIN SIMULATION============================")
 	print("Sim. T, Rho, Buffer size, Average in queue, Drop probability, differnce w/ last run: ")
-	for bs in (10, 25, 50):
+	for bs in (25, 50):
 		np.set_printoptions(threshold=sys.maxsize)	
 		simTime = 1000
 		error = 1
