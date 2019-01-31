@@ -1,16 +1,36 @@
+#!/usr/bin/env python3
 import numpy as np
 import random
 import math
 
+def generateRVArray(lam, len):
+    expRV = np.zeros(len)
+    for i in range(len):
+    	expRV[i] = (float(-math.log(1 - random.uniform(0, 1))) / lam)
+    return expRV
+
+def generateRV(lam):
+	expRV = (float(-math.log(1 - random.uniform(0, 1))) / lam)
+	return expRV
+
 def main():
+	
     lam = 75
 
-    expRV = []
-    for i in range(1000):
-    	expRV.append(float(-math.log(1 - random.uniform(0, 1))) / lam)
+    expRV = generateRVArray(lam, 1000)
 
-    print ("Mean: %f", (sum(expRV) / len(expRV)))
-    print ("Variance: %f", np.var(expRV))
+    expectedMean = 1/75
+    mean = sum(expRV) / len(expRV)
+
+    expectedVar = expectedMean**2
+    var = np.var(expRV)
+    print ("Expected Mean:", expectedMean)
+    print ("Mean: ", mean)
+    print ("% difference:", 100*(mean - expectedMean)/expectedMean)
+
+    print ("Expected Variance:", expectedVar)
+    print ("Variance: %f", var)
+    print ("% difference:", 100*(var - expectedVar)/expectedVar)
 
 
 if __name__ == '__main__':
