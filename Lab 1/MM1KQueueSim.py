@@ -108,7 +108,7 @@ def main():
 		firstRun = True
 		bufferSize = bs
 		while error > 0.05:
-			for i in range(1):
+			for i in range(11):
 				rho = round(0.5 + 0.1*i, 2)
 
 				eventsHeap = []
