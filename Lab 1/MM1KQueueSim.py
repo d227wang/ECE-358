@@ -126,36 +126,35 @@ def main():
 	
 
 	np.set_printoptions(threshold=sys.maxsize)	
-	for bs in (25, 50):
-		simTime = 1000
-		error = 1
-		errors = np.zeros(11)
-		prevousResult = [{'avgQueue': 0 , 'P_drop': 0} for n in range(11)]
-		firstRun = True
-		bufferSize = bs
-		while error > 0.05:
-			for i in range(11):
-				rho = round(0.5 + 0.1*i, 2)
+	simTime = 16000
+	error = 1
+	errors = np.zeros(11)
+	prevousResult = [{'avgQueue': 0 , 'P_drop': 0} for n in range(11)]
+	firstRun = True
+	bufferSize = 50
+	while error > 0.05:
+		for i in range(11):
+			rho = round(0.5 + 0.1*i, 2)
 
-				eventsHeap = []
-				setupEvents(eventsHeap, simTime, rho)
+			eventsHeap = []
+			setupEvents(eventsHeap, simTime, rho)
 
-				result = processEvents(eventsHeap, bufferSize)
+			result = processEvents(eventsHeap, bufferSize)
 
-				if prevousResult[i]['avgQueue'] != -1  and prevousResult[i]['P_drop'] != -1:
-					errors[i] = max(getDifference(result['avgQueue'], prevousResult[i]['avgQueue']), 
-						getDifference(result['P_drop'], prevousResult[i]['P_drop']))
+			if prevousResult[i]['avgQueue'] != -1  and prevousResult[i]['P_drop'] != -1:
+				errors[i] = max(getDifference(result['avgQueue'], prevousResult[i]['avgQueue']), 
+					getDifference(result['P_drop'], prevousResult[i]['P_drop']))
 
-				with open("output.txt",'a') as f:
-					f.write("%f, %f,  %f,  %f,  %f,  %f,\n" % (float(simTime) ,float(rho) ,float(bufferSize) ,float(round(result['avgQueue'], 8)) ,float(round(result['P_drop'], 8)) ,float(round(errors[i],8))))
-				print(simTime,", ", rho,", ", bufferSize,", ", round(result['avgQueue'], 8), ", ", round(result['P_drop'], 8), ", ", round(errors[i],8))
-				prevousResult[i]['avgQueue'] = result['avgQueue']
-				prevousResult[i]['P_drop'] = result['P_drop']
+			with open("output.txt",'a') as f:
+				f.write("%f, %f,  %f,  %f,  %f,  %f,\n" % (float(simTime) ,float(rho) ,float(bufferSize) ,float(round(result['avgQueue'], 8)) ,float(round(result['P_drop'], 8)) ,float(round(errors[i],8))))
+			print(simTime,", ", rho,", ", bufferSize,", ", round(result['avgQueue'], 8), ", ", round(result['P_drop'], 8), ", ", round(errors[i],8))
+			prevousResult[i]['avgQueue'] = result['avgQueue']
+			prevousResult[i]['P_drop'] = result['P_drop']
 
-			if not firstRun:
-				error = np.max(errors)
-			simTime = simTime*2
-			firstRun = False
+		if not firstRun:
+			error = np.max(errors)
+		simTime = simTime*2
+		firstRun = False
 	with open("output.txt", 'a') as f:
 		f.write("============================SIMULATION COMPLETE===========================\n")
 	print("============================SIMULATION COMPLETE============================")
