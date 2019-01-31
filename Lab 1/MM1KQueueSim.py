@@ -37,7 +37,7 @@ class Event:
 
 def getDifference(current, previous):
 	if current == previous:
-		return 1
+		return 0
 	try:
 		return (abs(current - previous) / previous)
 	except ZeroDivisionError:
@@ -142,7 +142,7 @@ def main():
 
 				result = processEvents(eventsHeap, bufferSize)
 
-				if prevousResult[i]['avgQueue'] != 0  and prevousResult[i]['P_drop'] != 0:
+				if prevousResult[i]['avgQueue'] != -1  and prevousResult[i]['P_drop'] != -1:
 					errors[i] = max(getDifference(result['avgQueue'], prevousResult[i]['avgQueue']), 
 						getDifference(result['P_drop'], prevousResult[i]['P_drop']))
 
