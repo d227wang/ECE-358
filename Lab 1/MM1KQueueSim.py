@@ -129,7 +129,7 @@ def main():
 	for bs in (25, 50):
 		simTime = 1000
 		error = 1
-		errors = np.zeros(5)
+		errors = np.zeros(11)
 		prevousResult = [{'avgQueue': 0 , 'P_drop': 0} for n in range(11)]
 		firstRun = True
 		bufferSize = bs
