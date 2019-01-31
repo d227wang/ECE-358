@@ -121,35 +121,35 @@ def setupEvents(eventsHeap, simTime, rho):
 def main():
 	print("============================BEGIN SIMULATION============================")
 	print("Sim. T, Rho, Buffer size, Average in queue, Drop probability, differnce w/ last run: ")
-	for bs in (50):
-		np.set_printoptions(threshold=sys.maxsize)	
-		simTime = 1000
-		error = 1
-		errors = np.zeros(11)
-		prevousResult = [{'avgQueue': 0 , 'P_drop': 0} for n in range(11)]
-		firstRun = True
-		bufferSize = bs
-		while error > 0.05:
-			for i in range(11):
-				rho = round(0.5 + 0.1*i, 2)
 
-				eventsHeap = []
-				setupEvents(eventsHeap, simTime, rho)
+	np.set_printoptions(threshold=sys.maxsize)	
+	simTime = 1000
+	error = 1
+	errors = np.zeros(11)
+	prevousResult = [{'avgQueue': 0 , 'P_drop': 0} for n in range(11)]
+	firstRun = True
+	bufferSize = 50
+	while error > 0.05:
+		for i in range(11):
+			rho = round(0.5 + 0.1*i, 2)
 
-				result = processEvents(eventsHeap)
+			eventsHeap = []
+			setupEvents(eventsHeap, simTime, rho)
 
-				if prevousResult[i]['avgQueue'] != 0  and prevousResult[i]['P_drop'] != 0:
-					errors[i] = max(getDifference(result['avgQueue'], prevousResult[i]['avgQueue']), 
-						getDifference(result['P_drop'], prevousResult[i]['P_drop']))
+			result = processEvents(eventsHeap)
 
-				print(simTime,", ", rho,", ", bufferSize,", ", round(result['avgQueue'], 8), ", ", round(result['P_drop'], 8), ", ", round(errors[i],8))
-				prevousResult[i]['avgQueue'] = result['avgQueue']
-				prevousResult[i]['P_drop'] = result['P_drop']
+			if prevousResult[i]['avgQueue'] != 0  and prevousResult[i]['P_drop'] != 0:
+				errors[i] = max(getDifference(result['avgQueue'], prevousResult[i]['avgQueue']), 
+					getDifference(result['P_drop'], prevousResult[i]['P_drop']))
 
-			if not firstRun:
-				error = np.max(errors)
-			simTime = simTime*2
-			firstRun = False
+			print(simTime,", ", rho,", ", bufferSize,", ", round(result['avgQueue'], 8), ", ", round(result['P_drop'], 8), ", ", round(errors[i],8))
+			prevousResult[i]['avgQueue'] = result['avgQueue']
+			prevousResult[i]['P_drop'] = result['P_drop']
+
+		if not firstRun:
+			error = np.max(errors)
+		simTime = simTime*2
+		firstRun = False
 	print("============================SIMULATION COMPLETE============================")
 
 if __name__ == '__main__':
