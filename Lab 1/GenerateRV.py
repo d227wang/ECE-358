@@ -3,6 +3,16 @@ import numpy as np
 import random
 import math
 
+###############################################################################
+# Create exponential random variables
+# Functions: 
+# generateRV(lam) - Takes in lam as the rate parameter and returns a exponential
+#                    random Variable
+# generateRVArray(lam, len) - generates an array of length len of exponential
+#                             random variables with rate parameter lam
+#
+###############################################################################
+
 def generateRVArray(lam, len):
     expRV = np.zeros(len)
     for i in range(len):
@@ -10,9 +20,11 @@ def generateRVArray(lam, len):
     return expRV
 
 def generateRV(lam):
+    #Use of inverse method to generate exponential random variable as given in lab manual
 	expRV = (float(-math.log(1 - random.uniform(0, 1))) / lam)
 	return expRV
 
+# Test of random variable functions
 def main():
 	
     lam = 75

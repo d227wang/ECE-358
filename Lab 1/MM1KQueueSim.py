@@ -5,6 +5,19 @@ import queue as queue
 from heapq import heappop, heappush, heapify
 from GenerateRV import generateRV
 
+###############################################################################
+# Simulate a MM1K queue
+#
+# NOTE: Largely based on MM1 queue simulator, comments will only cover portions 
+# not in MM1 queue simulator. Please see that file for additional comments
+#
+# Largest difference between the two simulators was that a min heap had to be 
+# used for this MM1K simulator as it allows departure events to be added and 
+# sorted much faster than for an array. Also a queue object is used instead of
+# keeping track of the simulated queue by the difference in packets arrived counter
+# and packets departed counter. This was done to improve code readability.
+###############################################################################
+
 bufferSize = 10
 L = 2000
 C = 1e6
@@ -14,10 +27,12 @@ class Event:
 	DEPARTURE = 2
 	OBSERVATION = 3
 
+	#Contructor
 	def __init__(self, time, type):
 		self.time = time
 		self.type = type
 
+	#Definition of less than comparitor needed to use Event objects in a min heap
 	def __lt__(self, other):
 		return self.time < other.time
 
@@ -53,9 +68,9 @@ def processEvents(eventsHeap):
 	while True: 
 		try:
 			event = heappop(eventsHeap)
+		#Exception catcher, will run when heap is empty to break while loop
 		except: 
 			break
-		diff = N_a - N_d
 
 		if event.type == Event.ARRIVAL:
 			N_a += 1
@@ -65,8 +80,10 @@ def processEvents(eventsHeap):
 				q.put(event)
 				currentTime = event.time
 
+				# Case that there are packets in the queue and the newly arrived packet will have to wait
 				if endOfQueue > currentTime:
 					waitTime = endOfQueue - currentTime
+				# No packets are currently in the queue 
 				else:
 					waitTime = 0
 				packetLength = generateRV(1/L)
@@ -77,14 +94,17 @@ def processEvents(eventsHeap):
 
 		elif event.type == Event.DEPARTURE:
 			N_d += 1
+			#Dequeue the departure event
 			q.get()
 		elif event.type == Event.OBSERVATION:
 			N_o += 1
 			if q.empty():
 				idleCounter += 1
+			# Same formula from MM1 simulator for Cumulative moving average: https://en.wikipedia.org/wiki/Moving_average
 			avgQueue = (avgQueue * (N_o - 1) + q.qsize()) / N_o
 
 	P_idle = idleCounter / N_o
+	# Probability of a packet being droped is the number of packets dropped per total packets processed (N_a)
 	P_drop = droppedCounter / N_a
 	return {'avgQueue': avgQueue, 'P_idle': P_idle, 'P_drop': P_drop}
 
@@ -95,7 +115,9 @@ def setupEvents(eventsHeap, simTime, rho):
 	generateEventTimes(eventsHeap, lam, simTime, Event.ARRIVAL)
 	generateEventTimes(eventsHeap, alpha, simTime, Event.OBSERVATION)
 
-
+# Run simualtor for buffer size of 10, 25, 50 packets and for 0.5<=rho<=1.5.
+# Simlulator starts with a simulation time of 1000 s and doubles that if there is a difference of over 5%
+# in a metric of interest between two runs.
 def main():
 	print("============================BEGIN SIMULATION============================")
 	print("Sim. T, Rho, Buffer size, Average in queue, Drop probability, differnce w/ last run: ")
