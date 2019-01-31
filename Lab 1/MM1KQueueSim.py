@@ -18,7 +18,6 @@ from GenerateRV import generateRV
 # and packets departed counter. This was done to improve code readability.
 ###############################################################################
 
-bufferSize = 10
 L = 2000
 C = 1e6
 
@@ -53,7 +52,7 @@ def generateEventTimes(eventsHeap, lam, simTime, type):
 		event = Event(runningTime, type)
 		heappush(eventsHeap, event)
 
-def processEvents(eventsHeap):
+def processEvents(eventsHeap, bufferSize):
 	N_a = 0
 	N_d = 0
 	N_o = 0
@@ -119,37 +118,46 @@ def setupEvents(eventsHeap, simTime, rho):
 # Simlulator starts with a simulation time of 1000 s and doubles that if there is a difference of over 5%
 # in a metric of interest between two runs.
 def main():
+	with open("output.txt",'a') as f:
+		f.write("============================BEGIN SIMULATION============================\n")
+		f.write("Sim. T, Rho, Buffer size, Average in queue, Drop probability, differnce w/ last run: \n")
 	print("============================BEGIN SIMULATION============================")
 	print("Sim. T, Rho, Buffer size, Average in queue, Drop probability, differnce w/ last run: ")
+	
 
 	np.set_printoptions(threshold=sys.maxsize)	
-	simTime = 1000
-	error = 1
-	errors = np.zeros(11)
-	prevousResult = [{'avgQueue': 0 , 'P_drop': 0} for n in range(11)]
-	firstRun = True
-	bufferSize = 50
-	while error > 0.05:
-		for i in range(11):
-			rho = round(0.5 + 0.1*i, 2)
+	for bs in (25, 50):
+		simTime = 1000
+		error = 1
+		errors = np.zeros(5)
+		prevousResult = [{'avgQueue': 0 , 'P_drop': 0} for n in range(11)]
+		firstRun = True
+		bufferSize = bs
+		while error > 0.05:
+			for i in range(11):
+				rho = round(0.5 + 0.1*i, 2)
 
-			eventsHeap = []
-			setupEvents(eventsHeap, simTime, rho)
+				eventsHeap = []
+				setupEvents(eventsHeap, simTime, rho)
 
-			result = processEvents(eventsHeap)
+				result = processEvents(eventsHeap, bufferSize)
 
-			if prevousResult[i]['avgQueue'] != 0  and prevousResult[i]['P_drop'] != 0:
-				errors[i] = max(getDifference(result['avgQueue'], prevousResult[i]['avgQueue']), 
-					getDifference(result['P_drop'], prevousResult[i]['P_drop']))
+				if prevousResult[i]['avgQueue'] != 0  and prevousResult[i]['P_drop'] != 0:
+					errors[i] = max(getDifference(result['avgQueue'], prevousResult[i]['avgQueue']), 
+						getDifference(result['P_drop'], prevousResult[i]['P_drop']))
 
-			print(simTime,", ", rho,", ", bufferSize,", ", round(result['avgQueue'], 8), ", ", round(result['P_drop'], 8), ", ", round(errors[i],8))
-			prevousResult[i]['avgQueue'] = result['avgQueue']
-			prevousResult[i]['P_drop'] = result['P_drop']
+				with open("output.txt",'a') as f:
+					f.write("%f, %f,  %f,  %f,  %f,  %f,\n" % (float(simTime) ,float(rho) ,float(bufferSize) ,float(round(result['avgQueue'], 8)) ,float(round(result['P_drop'], 8)) ,float(round(errors[i],8))))
+				print(simTime,", ", rho,", ", bufferSize,", ", round(result['avgQueue'], 8), ", ", round(result['P_drop'], 8), ", ", round(errors[i],8))
+				prevousResult[i]['avgQueue'] = result['avgQueue']
+				prevousResult[i]['P_drop'] = result['P_drop']
 
-		if not firstRun:
-			error = np.max(errors)
-		simTime = simTime*2
-		firstRun = False
+			if not firstRun:
+				error = np.max(errors)
+			simTime = simTime*2
+			firstRun = False
+	with open("output.txt", 'a') as f:
+		f.write("============================SIMULATION COMPLETE===========================\n")
 	print("============================SIMULATION COMPLETE============================")
 
 if __name__ == '__main__':
