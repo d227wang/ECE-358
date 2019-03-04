@@ -11,7 +11,7 @@ from GenerateRV import generateRVArray
 R = 10**6
 L = 1500
 D = 10
-S = (2/3)*(3*10**8)
+S = (2/3)*(3*(10**8))
 trans_delay = L/R
 prop_delay = D/S
 Tp = 512/R
@@ -28,14 +28,15 @@ def generateEventTimes(A, simTime):
 		numEvents += 1
 	return eventTimes
 
-def processEvents(nodes):
+def processEvents(nodes, simTime):
 	packetsTransmitted = 0
 	packetsSuccessful = 0
+	packetsDropped = 0
+	collisionCounters = np.zeros(len(nodes))
 	time = 0
 
-	while (packetsSuccessful < numEvents):
+	while (time < simTime):
 		nextPackets = np.full(len(nodes), np.inf)
-		collisionCounters = np.zeros(len(nodes))
 		for i in range(len(nodes)):
 			if nodes[i].empty() == False:
 				nextPackets[i] = nodes[i].queue[0]
@@ -59,11 +60,12 @@ def processEvents(nodes):
 					collisionDetected = True
 
 					if collisionCounters[i] > 10:
-						print("dropped")
+						# print("dropped")
 						nodes[i].get()
+						packetsDropped += 1
 						collisionCounters[i] = 0
 					else: 
-						wait = random.uniform(0, 2**collisionCounters[i] + 1)*Tp
+						wait = random.uniform(0, (2**collisionCounters[i]) - 1)*Tp
 						nodes[i].queue[0] = time + wait
 
 				# Adjust packet times
@@ -78,11 +80,14 @@ def processEvents(nodes):
 			packetsSuccessful += 1
 			collisionCounters[i] = 0
 		else: 
-			wait = random.uniform(0, 2**collisionCounters[senderIndex] + 1)*Tp
+			packetsTransmitted += 1
+			collisionCounters[i] += 1
+			wait = random.uniform(0, 2**collisionCounters[senderIndex] - 1)*Tp
 			nodes[senderIndex].queue[0] = time + wait
 
-	print(packetsTransmitted)
 	print(packetsSuccessful)
+	print(packetsTransmitted)
+	print(packetsSuccessful/packetsTransmitted)
 
 
 
@@ -91,14 +96,14 @@ def main():
 	global numEvents
 
 	numEvents = 0
-	N = 40
+	N = 20
 	A = 12
-	simTime = 1000
+	simTime = 10000
 	
 	nodes = [0] * N
 	for i in range(0, N):
 		nodes[i] = generateEventTimes(A, simTime)
-	processEvents(nodes)
+	processEvents(nodes, simTime)
 	# print(nodes[19].queue[0])
 
 if __name__ == '__main__':
