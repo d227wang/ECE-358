@@ -74,6 +74,7 @@ def processEvents(nodes, simTime, persistant):
 
 				# Adjust packet times
 				elif nodes[i].queue[0] >= firstBitArrivalTime and nodes[i].queue[0] < lastBitArrivalTime:
+					packetsTransmitted += 1
 					if persistant == True:
 						nodes[i].queue[0] = lastBitArrivalTime
 					else: 
@@ -113,7 +114,7 @@ def main():
 	N = [20, 40, 60, 80, 100]
 	A = 12
 	persistant = True
-	simTime = 100
+	simTime = 1000
 	error = 1
 	errors = np.zeros(len(N))
 	firstRun = True
