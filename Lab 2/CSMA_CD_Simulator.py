@@ -107,8 +107,8 @@ def main():
 	np.set_printoptions(threshold=sys.maxsize)	
 	dt = datetime.now()
 	N = [20, 40, 60, 80, 100]
-	A = [7, 10, 20]
-	persistant = [True, False]
+	A = [20]
+	persistant = [False]
 
 	for p in persistant:
 		for a in A:
