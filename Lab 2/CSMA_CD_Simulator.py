@@ -74,7 +74,6 @@ def processEvents(nodes, simTime, persistant):
 
 				# Adjust packet times
 				elif nodes[i].queue[0] >= firstBitArrivalTime and nodes[i].queue[0] < lastBitArrivalTime:
-					packetsTransmitted += 1
 					if persistant == True:
 						nodes[i].queue[0] = lastBitArrivalTime
 					else: 
