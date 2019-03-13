@@ -7,6 +7,7 @@ import queue as queue
 from enum import Enum
 from GenerateRV import generateRV
 from GenerateRV import generateRVArray
+from datetime import datetime
 
 R = 10**6
 L = 1500
@@ -15,7 +16,6 @@ S = (2/3)*(3*(10**8))
 trans_delay = L/R
 prop_delay = D/S
 Tp = 512/R
-numEvents = 0
 def getDifference(current, previous):
 	if current == previous:
 		return 1
@@ -24,14 +24,12 @@ def getDifference(current, previous):
 	except ZeroDivisionError:
 		return 0
 def generateEventTimes(A, simTime):
-	global numEvents
 	eventTimes = queue.Queue(int(simTime*(2*A)))
 	runningTime = 0
 	while runningTime < simTime:
 		time = generateRV(A)
 		runningTime += time
 		eventTimes.put(runningTime)
-		numEvents += 1
 	return eventTimes
 
 def processEvents(nodes, simTime, persistant):
@@ -107,38 +105,43 @@ def processEvents(nodes, simTime, persistant):
 
 def main():
 	np.set_printoptions(threshold=sys.maxsize)	
-	global numEvents
-
-	numEvents = 0
+	dt = datetime.now()
 	N = [20, 40, 60, 80, 100]
-	A = 12
-	persistant = True
-	simTime = 1000
-	error = 1
-	errors = np.zeros(len(N))
-	firstRun = True
-	prevousResult = [{'efficiency': 0 , 'throughput': 0} for n in range(len(N))]
-	while error > 0.05:
-		print("=====Begin simulation for T: " + str(simTime))
-		print("A, N, Efficiency, Throughput, errors")
-		for n in range(len(N)):
-			nodes = [0] * N[n]
-			for i in range(0, N[n]):
-				nodes[i] = generateEventTimes(A, simTime)
-			e = processEvents(nodes, simTime, persistant)
-			
+	A = [7, 10, 20]
+	persistant = [True, False]
 
-			errors[n] = max(getDifference(e['efficiency'], prevousResult[n]['efficiency']), getDifference(e['throughput'], prevousResult[n]['throughput']))
-			prevousResult[n]['efficiency'] = e['efficiency']
-			prevousResult[n]['throughput'] = e['throughput']
-			
-			print( str(A)+ ", " + str(N[n]) + ", " + str(e['efficiency']) + ", " + str(e['throughput'])+ ", " + str(errors[n]))
-			
+	for p in persistant:
+		for a in A:
+			simTime = 1000
+			error = 1
+			errors = np.zeros(len(N))
+		
+			prevousResult = [{'efficiency': 0 , 'throughput': 0} for n in range(len(N))]
+			firstRun = True
+			while error > .05:
+				print("=====Begin simulation for T: " + str(simTime), file=open(str(dt)+".txt", "a"))
+				print("=====Begin simulation for T: " + str(simTime))
+				print("Persistant, A, N, Efficiency, Throughput, errors", file=open(str(dt)+".txt", "a"))
+				print("Persistant, A, N, Efficiency, Throughput, errors")
+				for n in range(len(N)):
+					nodes = [0] * N[n]
+					for i in range(0, N[n]):
+						nodes[i] = generateEventTimes(a, simTime)
+					e = processEvents(nodes, simTime, p)
+					
 
-		if not firstRun:
-			error = max(errors)
-		simTime = simTime*2
-		firstRun = False
+					errors[n] = max(getDifference(e['efficiency'], prevousResult[n]['efficiency']), getDifference(e['throughput'], prevousResult[n]['throughput']))
+					prevousResult[n]['efficiency'] = e['efficiency']
+					prevousResult[n]['throughput'] = e['throughput']
+					
+					print(str(p) + ", " + str(a)+ ", " + str(N[n]) + ", " + str(e['efficiency']) + ", " + str(e['throughput'])+ ", " + str(errors[n]), file=open(str(dt)+".txt", "a"))
+					print(str(p) + ", " + str(a)+ ", " + str(N[n]) + ", " + str(e['efficiency']) + ", " + str(e['throughput'])+ ", " + str(errors[n]))
+					
+
+				if not firstRun:
+					error = max(errors)
+				simTime = simTime*2
+				firstRun = False
 
 if __name__ == '__main__':
 	main()
