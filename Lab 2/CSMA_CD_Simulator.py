@@ -116,12 +116,12 @@ def main():
 	np.set_printoptions(threshold=sys.maxsize)	
 	dt = datetime.now()
 	N = [20, 40, 60, 80, 100]
-	A = [12]
-	persistant = [True]
+	A = [7, 10, 20]
+	persistant = [True, False]
 
 	for p in persistant:
 		for a in A:
-			simTime = 1000
+			simTime = 500
 			error = 1
 			errors = np.zeros(len(N))
 		
