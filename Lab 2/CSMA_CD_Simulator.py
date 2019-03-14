@@ -34,8 +34,8 @@ def generateEventTimes(A, simTime):
 
 def updatePacketTimes(node, time):
 	for p in range(len(node.queue)):
-		if node.queue[p] < time:
-			node.queue[p] = time
+		if node.queue[p] < time + p*trans_delay:
+			node.queue[p] = time + p*trans_delay
 		else:
 			return node
 	return node
@@ -91,7 +91,7 @@ def processEvents(nodes, simTime, persistant):
 							collisionSensingCounters[i] = 0
 						else: 
 							wait = random.uniform(0, (2**collisionSensingCounters[i]) - 1)*Tp
-							nodes[i].queue[0] = time + wait
+							nodes[i] = updatePacketTimes(nodes[i], time + wait)
 			
 		if (collisionDetected == False):
 			nodes[senderIndex].get()
@@ -103,7 +103,7 @@ def processEvents(nodes, simTime, persistant):
 			packetsTransmitted += 1
 			collisionCounters[senderIndex] += 1
 			wait = random.uniform(0, 2**collisionCounters[senderIndex] - 1)*Tp
-			nodes[senderIndex].queue[0] = time + wait
+			nodes[senderIndex] = updatePacketTimes(nodes[senderIndex], time + wait)
 			collisionSensingCounters[i] = 0
 
 	efficiency = packetsSuccessful/packetsTransmitted
