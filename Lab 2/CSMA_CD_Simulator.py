@@ -118,10 +118,10 @@ def main():
 	N = [20, 40, 60, 80, 100]
 	A = [7, 10, 20]
 	persistant = [True, False]
-
-	for p in persistant:
-		for a in A:
-			simTime = 500
+	
+	for a in A:
+		for p in persistant:
+			simTime = 100
 			error = 1
 			errors = np.zeros(len(N))
 		
