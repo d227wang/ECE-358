@@ -32,6 +32,14 @@ def generateEventTimes(A, simTime):
 		eventTimes.put(runningTime)
 	return eventTimes
 
+def updatePacketTimes(node, time):
+	for p in range(len(node.queue)):
+		if node.queue[p] < time:
+			node.queue[p] = time
+		else:
+			return node
+	return node
+
 def processEvents(nodes, simTime, persistant):
 	packetsTransmitted = 0
 	packetsSuccessful = 0
@@ -68,12 +76,13 @@ def processEvents(nodes, simTime, persistant):
 						collisionCounters[i] = 0
 					else: 
 						wait = random.uniform(0, (2**collisionCounters[i]) - 1)*Tp
-						nodes[i].queue[0] = time + wait
+						nodes[i] = updatePacketTimes(nodes[i],  time + wait)
 
 				# Adjust packet times
-				elif nodes[i].queue[0] >= firstBitArrivalTime and nodes[i].queue[0] < lastBitArrivalTime:
+				elif nodes[i].queue[0] >= firstBitArrivalTime and nodes[i].queue[0] <= lastBitArrivalTime:
 					if persistant == True:
-						nodes[i].queue[0] = lastBitArrivalTime
+						nodes[i] = updatePacketTimes(nodes[i], lastBitArrivalTime)
+
 					else: 
 						collisionSensingCounters[i] += 1
 						if collisionSensingCounters[i] > 10:
@@ -107,8 +116,8 @@ def main():
 	np.set_printoptions(threshold=sys.maxsize)	
 	dt = datetime.now()
 	N = [20, 40, 60, 80, 100]
-	A = [20]
-	persistant = [False]
+	A = [12]
+	persistant = [True]
 
 	for p in persistant:
 		for a in A:
